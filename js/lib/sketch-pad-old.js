@@ -24,6 +24,7 @@ var SketchPad = (function(){
 		sketchPad.clear = clear.bind(sketchPad);
 		sketchPad.debug = debug.bind(sketchPad);
 		sketchPad.setOption = setOption.bind(sketchPad);
+		sketchPad.setupCanvas = setupCanvas.bind(sketchPad);
 	}
 
 	function cacheDom(){
@@ -44,9 +45,8 @@ var SketchPad = (function(){
 
 	function strokeStart(e){
 		var firstTouch = e.touches[0];
-		var canvasEdges = this.dom.canvas.getBoundingClientRect();
-		var x = firstTouch.pageX - canvasEdges.left;
-		var y = firstTouch.pageY - canvasEdges.top;
+		var x = (firstTouch.pageX - this.canvasEdges.left) * this.pixelRatio;
+		var y = (firstTouch.pageY - this.canvasEdges.top) * this.pixelRatio;
 		var opacity = this.options.widthStroking ? 1 : firstTouch.force * 3;
 		var stroke = "rgba(0,0,0," + opacity + ")";
 		var width = this.options.widthStroking ? 10 * firstTouch.force : 1;
@@ -65,9 +65,8 @@ var SketchPad = (function(){
 
 	function strokeMove(e){
 		var firstTouch = e.touches[0];
-		var canvasEdges = this.dom.canvas.getBoundingClientRect();
-		var x = firstTouch.pageX - canvasEdges.left;
-		var y = firstTouch.pageY - canvasEdges.top;
+		var x = (firstTouch.pageX - this.canvasEdges.left) * this.pixelRatio;
+		var y = (firstTouch.pageY - this.canvasEdges.top) * this.pixelRatio;
 		var opacity = this.options.widthStroking ? 1 : firstTouch.force* 3;
 		var stroke = "rgba(0,0,0," + opacity + ")";
 		var width = this.options.widthStroking ? 10 * firstTouch.force : 1;
@@ -114,14 +113,21 @@ var SketchPad = (function(){
 		}
 	}
 
+	function setupCanvas(){
+		this.context = this.dom.canvas.getContext("2d");
+		this.pixelRatio = Util.pixelRatio(this.context);
+		this.canvasEdges = this.dom.canvas.getBoundingClientRect();
+		this.dom.canvas.width = this.canvasEdges.width * this.pixelRatio;
+		this.dom.canvas.height = this.canvasEdges.height * this.pixelRatio;
+		this.context.lineJoin = "round";
+		this.context.scale(this.pixelRatio, this.pixelRatio);
+	}
+
 	function init(){
 		this.cacheDom();
-		this.context = this.dom.canvas.getContext("2d");
+		this.setupCanvas();
 		this.attachEvents();
-		var canvasEdges = this.dom.canvas.getBoundingClientRect()
-		this.dom.canvas.width = canvasEdges.width;
-		this.dom.canvas.height = canvasEdges.height;
-		this.context.lineJoin = "round";
+
 		this.clear();
 
 		if(this.options.debug){

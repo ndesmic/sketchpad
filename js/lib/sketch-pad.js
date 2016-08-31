@@ -98,7 +98,8 @@ const SketchPad = (function(){
 		this.cacheDom();
 		this.context = this.dom.canvas.getContext("2d");
 		this.attachEvents();
-		let canvasEdges = this.dom.canvas.getBoundingClientRect()
+		let canvasEdges = this.dom.canvas.getBoundingClientRect();
+
 		this.dom.canvas.width = canvasEdges.width;
 		this.dom.canvas.height = canvasEdges.height;
 		this.clear();
